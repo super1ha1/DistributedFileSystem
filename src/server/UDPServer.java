@@ -1,9 +1,14 @@
 package server;
 
 
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 
 public class UDPServer {
 
@@ -30,12 +35,8 @@ public class UDPServer {
                 byte[] data = incoming.getData();
                 String s = new String(data, 0, incoming.getLength());
 
-                //echo the details of incoming data - client ip : client port - client message
-                echo(incoming.getAddress().getHostAddress() + " : " + incoming.getPort() + " - " + s);
+                processCommand(sock, incoming, s);
 
-                s = "OK : " + s;
-                DatagramPacket dp = new DatagramPacket(s.getBytes() , s.getBytes().length , incoming.getAddress() , incoming.getPort());
-                sock.send(dp);
             }
         }
 
@@ -44,6 +45,56 @@ public class UDPServer {
             System.err.println("IOException " + e);
         }
     }
+
+    private static void processCommand(DatagramSocket sock, DatagramPacket incoming, String s) throws IOException{
+        //echo the details of incoming data - client ip : client port - client message
+        echo(incoming.getAddress().getHostAddress() + " : " + incoming.getPort() + " - " + s);
+
+        String [] array = s.trim().replaceAll("( )+", " ").split(" ");
+        switch (array[0]){
+            case Const.REQUEST_TYPE.READ:
+                if(Files.exists(Paths.get(array[1]))){
+                    //byte[] bytes = readFile(array);
+                    echo("file exist");
+                }else { //File not exist
+                    String msg = "File not exist";
+                    DatagramPacket dp = new DatagramPacket(msg.getBytes() , msg.getBytes().length , incoming.getAddress() , incoming.getPort());
+                    sock.send(dp);
+                }
+                break;
+
+            default:
+                break;
+        }
+    }
+
+    private static byte[] readFile(String[] array) {
+        try {
+            FileInputStream in = null;
+            FileOutputStream out = null;
+
+            try {
+                in = new FileInputStream("xanadu.txt");
+                out = new FileOutputStream("outagain.txt");
+                int c;
+
+                while ((c = in.read()) != -1) {
+                    out.write(c);
+                }
+            } finally {
+                if (in != null) {
+                    in.close();
+                }
+                if (out != null) {
+                    out.close();
+                }
+            }
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+        return new byte[0];
+    }
+
 
     //simple function to echo data to terminal
     public static void echo(String msg)
