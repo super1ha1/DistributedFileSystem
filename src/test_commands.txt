@@ -1,0 +1,18 @@
+1) READ
+init: a.txt not exist
+in.txt:  abcd
+
+read "E:\IdeaProjects\codeforces\a.txt" 0 1
+read "E:\IdeaProjects\codeforces\in.txt" 0 1
+read "E:\IdeaProjects\codeforces\in.txt" 5 1
+read "E:\IdeaProjects\codeforces\in.txt" 0 4
+read "E:\IdeaProjects\codeforces\in.txt" 0 10
+
+
+2) write
+init: in.txt: acd
+write "E:\IdeaProjects\codeforces\a.txt" 0 "z"
+write "E:\IdeaProjects\codeforces\in.txt" 0 "z"
+write "E:\IdeaProjects\codeforces\in.txt" 0 "xyz"
+write "E:\IdeaProjects\codeforces\in.txt" 10 "z"
+write "E:\IdeaProjects\codeforces\in.txt" 1 "b"

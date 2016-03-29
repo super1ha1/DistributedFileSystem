@@ -12,14 +12,6 @@ import java.nio.file.Paths;
 
 public class ReadOperation extends Operation {
 
-    private DatagramPacket reply;
-    private InetAddress address;
-    private int port;
-    private String request;
-
-    private String filePath;
-    private int offset, length;
-
     public ReadOperation(DatagramSocket socket, DatagramPacket incoming){
         super(socket, incoming);
     }
@@ -46,7 +38,7 @@ public class ReadOperation extends Operation {
                 in = new FileInputStream(filePath);
                 int avail = in.available();
                 if(offset >= avail){
-                    exceptionMsg = "Error: offset larger than length";
+                    exceptionMsg = "Error: offset larger than length: offset " + offset + " len: " + avail ;
                     super.reply(exceptionMsg.getBytes());
                 }
                 byte[] output = new byte[length];

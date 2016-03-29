@@ -5,3 +5,10 @@ read "file_path" offset length
 
 "file_path": is absolute path, may contain space
 
+done read
+update interface
+
+2) code write
+define request:
+write "file_path" offset "content"
+

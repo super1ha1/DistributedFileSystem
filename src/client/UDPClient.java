@@ -1,6 +1,8 @@
 package client;
 
 
+import utils.Utils;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -26,7 +28,7 @@ public class UDPClient {
             while(true)
             {
                 //take input and send the packet
-                echo("Enter command or -1 to terminate : ");
+                Utils.echo("Enter command or -1 to terminate : ");
                 s = (String)cin.readLine();
                 if(s.trim().equals("-1")){
                     break;
@@ -45,7 +47,7 @@ public class UDPClient {
                 s = new String(data, 0, reply.getLength());
 
                 //echo the details of incoming data - client ip : client port - client message
-                echo(reply.getAddress().getHostAddress() + " : " + reply.getPort() + " - " + s);
+                Utils.echo(reply.getAddress().getHostAddress() + " : " + reply.getPort() + " - " + s);
             }
         }
 
@@ -55,9 +57,4 @@ public class UDPClient {
         }
     }
 
-    //simple function to echo data to terminal
-    public static void echo(String msg)
-    {
-        System.out.println(msg);
-    }
 }
