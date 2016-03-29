@@ -18,7 +18,7 @@ public class UDPClientImpl {
         DatagramSocket sock = null;
         int port = 7777;
         String s;
-
+        boolean register = false;
         BufferedReader cin = new BufferedReader(new InputStreamReader(System.in));
 
         try
@@ -29,15 +29,22 @@ public class UDPClientImpl {
 
             while(true)
             {
-                //take input and send the packet
-                Utils.echo("Enter command or -1 to terminate : ");
-                s = (String)cin.readLine();
-                if(s.trim().equals("-1")){
-                    break;
+                if(!register){
+                    //take input and send the packet
+                    Utils.echo("Enter command or -1 to terminate : ");
+                    s = (String)cin.readLine();
+                    if(s.trim().equals("-1")){
+                        break;
+                    }
+                    byte[] b = s.getBytes();
+                    DatagramPacket dp = new DatagramPacket(b , b.length , host , port);
+                    sock.send(dp);
+
+                    if(s.contains("register")){
+                        register = true;
+                    }
                 }
-                byte[] b = s.getBytes();
-                DatagramPacket dp = new DatagramPacket(b , b.length , host , port);
-                sock.send(dp);
+
 
                 //now receive reply
                 //buffer to receive incoming data
@@ -48,9 +55,10 @@ public class UDPClientImpl {
                 byte[] data = reply.getData();
                 s = new String(data, 0, reply.getLength());
 
+
                 if(s.contains(Const.REQUEST_TYPE.CALLBACK)){
-                    s.replace(Const.REQUEST_TYPE.CALLBACK, "");
-                    client.onWrite(s.getBytes());
+                    String content  = s.substring(s.indexOf(Const.REQUEST_TYPE.CALLBACK));
+                    client.onWrite(content.getBytes());
                 }else {
                     //echo the details of incoming data - client ip : client port - client message
                     Utils.echo(reply.getAddress().getHostAddress() + " : " + reply.getPort() + " - " + s);

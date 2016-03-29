@@ -38,6 +38,7 @@ public class RegisterOperation extends Operation {
                 interval);
 
         this.udpServer.getCbList().add(newClient);
+
         replyMsg = "You have registered successfully!";
         super.reply(replyMsg.getBytes());
 
