@@ -12,3 +12,7 @@ update interface
 define request:
 write "file_path" offset "content"
 
+
+3) register callback
+define request
+register "file_path" num_second

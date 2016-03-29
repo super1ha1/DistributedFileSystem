@@ -1,9 +1,8 @@
 package server;
 
 
-import utils.ReadOperation;
-import utils.Utils;
-import utils.WriteOperation;
+import client.CallBack;
+import utils.*;
 
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -13,65 +12,36 @@ import java.net.DatagramSocket;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 
 public class UDPServer {
 
-    public static void main(String args[])
-    {
-        DatagramSocket sock = null;
+    private ArrayList<RegisteredClient> cbList = new ArrayList<>();
 
-        try
-        {
-            sock = new DatagramSocket(7777);
+    public UDPServer(){
 
-            byte[] buffer = new byte[65536];
-            DatagramPacket incoming = new DatagramPacket(buffer, buffer.length);
+    }
 
-            Utils.echo("Server socket created. Waiting for incoming data...");
+    public ArrayList<RegisteredClient> getCbList() {
+        return cbList;
+    }
 
-            //communication loop
-            while(true)
-            {
-                sock.receive(incoming);
-                processCommand(sock, incoming);
+    public void setCbList(ArrayList<RegisteredClient> cbList) {
+        this.cbList = cbList;
+    }
 
+    public void onFileChanged() throws Exception{
+        for( RegisteredClient client: cbList){
+            if(stillValid(client)){
+                client.onCallBack();
+            }else {
+                this.cbList.remove(client);
             }
         }
-
-        catch(Exception e)
-        {
-            System.err.println("IOException " + e);
-        }
     }
 
-    private static void processCommand(DatagramSocket sock, DatagramPacket incoming) throws Exception{
-        byte[] data = incoming.getData();
-        String command = new String(data, 0, incoming.getLength());
-
-        //echo the details of incoming data - client ip : client port - client message
-        Utils.echo("Request: " + incoming.getAddress().getHostAddress() + " : " + incoming.getPort() + " - " + command);
-
-        String [] firstSplit = command.trim().split("\"");
-        String action = firstSplit[0].trim();
-        switch (action){
-            case Const.REQUEST_TYPE.READ:
-                ReadOperation readOperation = new ReadOperation(sock, incoming);
-                readOperation.process();
-                break;
-
-            case Const.REQUEST_TYPE.WRITE:
-                WriteOperation writeOperation = new WriteOperation(sock, incoming);
-                writeOperation.process();
-                break;
-
-            default:
-                String errorMsg = "Error: command is not recognized";
-                DatagramPacket packet = new DatagramPacket(errorMsg.getBytes(), errorMsg.getBytes().length,
-                        incoming.getAddress(), incoming.getPort());
-                sock.send(packet);
-                break;
-        }
+    // valid = registerTime  + interval >= currentTime
+    private boolean stillValid(RegisteredClient client) {
+        return client.getRegisteredTime() + client.getNumSeconds() >= (System.currentTimeMillis()/1000);
     }
-
-
 }

@@ -1,6 +1,8 @@
 package utils;
 
 
+import server.UDPServer;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -12,8 +14,10 @@ import java.nio.file.Paths;
 
 public class WriteOperation  extends Operation{
 
-    public WriteOperation(DatagramSocket socket, DatagramPacket incoming){
+    private UDPServer udpServer;
+    public WriteOperation(DatagramSocket socket, DatagramPacket incoming, UDPServer udpServer){
         super(socket, incoming);
+        this.udpServer = udpServer;
     }
 
     @Override
@@ -55,6 +59,8 @@ public class WriteOperation  extends Operation{
 
                 replyMsg = "Write to file successfully!";
                 super.reply(replyMsg.getBytes());
+
+                this.udpServer.onFileChanged();
 
             } catch (Exception e){
 
