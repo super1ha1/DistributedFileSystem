@@ -26,10 +26,12 @@ public class UDPClient {
             while(true)
             {
                 //take input and send the packet
-                echo("Enter message to send : ");
+                echo("Enter command or -1 to terminate : ");
                 s = (String)cin.readLine();
+                if(s.trim().equals("-1")){
+                    break;
+                }
                 byte[] b = s.getBytes();
-
                 DatagramPacket  dp = new DatagramPacket(b , b.length , host , port);
                 sock.send(dp);
 

@@ -1,0 +1,7 @@
+29/03
+1) code read
+define request :
+read "file_path" offset length
+
+"file_path": is absolute path, may contain space
+
