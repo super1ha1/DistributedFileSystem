@@ -1,5 +1,7 @@
 package utils;
 
+import server.UDPServer;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -12,8 +14,8 @@ import java.nio.file.Paths;
 
 public class ReadOperation extends Operation {
 
-    public ReadOperation(DatagramSocket socket, DatagramPacket incoming){
-        super(socket, incoming);
+    public ReadOperation(DatagramSocket socket, DatagramPacket incoming, UDPServer server, int requestId){
+        super(socket, incoming, server, requestId);
     }
 
 

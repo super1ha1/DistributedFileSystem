@@ -15,4 +15,9 @@ public class Const {
         public static final String REGISTER_SUCCESS = "You have registered successfully!";
         public static final String REGISTER_EXPIRE = "Your monitor interval has expired";
     }
+
+    public static class SEMANTIC{
+        public static final String AT_LEAST_1 = "at_least_1";
+        public static final String AT_MOST_1 =  "at_most_1";
+    }
 }

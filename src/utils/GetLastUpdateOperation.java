@@ -1,5 +1,7 @@
 package utils;
 
+import server.UDPServer;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.net.DatagramPacket;
@@ -8,8 +10,8 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 
 public class GetLastUpdateOperation extends Operation {
-    public GetLastUpdateOperation(DatagramSocket socket, DatagramPacket incoming){
-        super(socket, incoming);
+    public GetLastUpdateOperation(DatagramSocket socket, DatagramPacket incoming, UDPServer server, int requestId){
+        super(socket, incoming, server, requestId);
     }
 
 

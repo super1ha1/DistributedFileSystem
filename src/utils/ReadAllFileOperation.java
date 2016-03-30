@@ -1,6 +1,8 @@
 package utils;
 
 
+import server.UDPServer;
+
 import java.io.FileInputStream;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
@@ -8,8 +10,8 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 
 public class ReadAllFileOperation extends Operation{
-    public ReadAllFileOperation(DatagramSocket socket, DatagramPacket incoming){
-        super(socket, incoming);
+    public ReadAllFileOperation(DatagramSocket socket, DatagramPacket incoming, UDPServer server, int requestId){
+        super(socket, incoming, server, requestId);
     }
 
 

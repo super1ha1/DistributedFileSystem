@@ -43,3 +43,11 @@ get_last_update "E:\IdeaProjects\codeforces\in.txt"
 init: in.txt: acd
 read_all "E:\IdeaProjects\codeforces\a.txt"
 read_all "E:\IdeaProjects\codeforces\in.txt"
+
+
+7) start cmd 
+start localhost 7777 60 2
+start at_least_1
+start at_most_1
+
+

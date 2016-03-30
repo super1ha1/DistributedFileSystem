@@ -3,6 +3,7 @@ package client;
 
 import utils.Utils;
 
+import java.net.DatagramSocket;
 import java.net.InetAddress;
 
 public class UDPClient implements CallBack {
@@ -11,20 +12,21 @@ public class UDPClient implements CallBack {
     private static final int FIRST_ID = 0;
 
 
-    private InetAddress serverIP;
+    private InetAddress host;
     private int port;
     private long cacheRefreshInterval;
     private long retransmitInterval;
-
+    private DatagramSocket socket;
     private boolean registered;
 
     private int requestId;
 
-    public UDPClient(long retransmitInterval, long cacheRefreshInterval, int port, InetAddress serverIP) {
+    public UDPClient(InetAddress host, int port, long cacheRefreshInterval, long retransmitInterval) throws Exception {
         this.retransmitInterval = retransmitInterval;
         this.cacheRefreshInterval = cacheRefreshInterval;
         this.port = port;
-        this.serverIP = serverIP;
+        this.host = host;
+        this.socket = new DatagramSocket();
     }
 
     public UDPClient() {
@@ -55,5 +57,25 @@ public class UDPClient implements CallBack {
 
     public void increaseRequestId() {
         this.requestId++;
+    }
+
+    public InetAddress getHost() {
+        return host;
+    }
+
+    public int getPort() {
+        return port;
+    }
+
+    public long getCacheRefreshInterval() {
+        return cacheRefreshInterval;
+    }
+
+    public long getRetransmitInterval() {
+        return retransmitInterval;
+    }
+
+    public DatagramSocket getSocket() {
+        return socket;
     }
 }

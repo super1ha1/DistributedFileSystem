@@ -12,11 +12,8 @@ import java.nio.file.Paths;
 
 public class AppendOperation extends Operation {
 
-
-    private UDPServer udpServer;
-    public AppendOperation(DatagramSocket socket, DatagramPacket incoming, UDPServer udpServer){
-        super(socket, incoming);
-        this.udpServer = udpServer;
+    public AppendOperation(DatagramSocket socket, DatagramPacket incoming, UDPServer udpServer, int requestId){
+        super(socket, incoming, udpServer, requestId);
     }
 
     @Override
@@ -47,7 +44,7 @@ public class AppendOperation extends Operation {
                 replyMsg = Utils.addRequestId(requestId,  "Append to file successfully!");
                 super.reply(replyMsg.getBytes());
 
-                this.udpServer.onFileChanged();
+                super.getServer().onFileChanged();
 
             } catch (Exception e){
 

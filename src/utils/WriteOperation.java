@@ -15,10 +15,8 @@ import java.nio.file.Paths;
 
 public class WriteOperation  extends Operation{
 
-    private UDPServer udpServer;
-    public WriteOperation(DatagramSocket socket, DatagramPacket incoming, UDPServer udpServer){
-        super(socket, incoming);
-        this.udpServer = udpServer;
+    public WriteOperation(DatagramSocket socket, DatagramPacket incoming, UDPServer udpServer, int requestId){
+        super(socket, incoming, udpServer, requestId);
     }
 
     @Override
@@ -64,7 +62,7 @@ public class WriteOperation  extends Operation{
                 replyMsg = Utils.addRequestId(requestId,  "Write to file successfully!");
                 super.reply(replyMsg.getBytes());
 
-                this.udpServer.onFileChanged();
+                super.getServer().onFileChanged();
 
             } catch (Exception e){
 

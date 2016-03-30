@@ -12,10 +12,8 @@ import java.nio.file.Paths;
 
 public class RegisterOperation extends Operation {
 
-    private UDPServer udpServer;
-    public RegisterOperation(DatagramSocket socket, DatagramPacket incoming, UDPServer udpServer){
-        super(socket, incoming);
-        this.udpServer = udpServer;
+    public RegisterOperation(DatagramSocket socket, DatagramPacket incoming, UDPServer udpServer, int requestId){
+        super(socket, incoming, udpServer, requestId);
     }
 
 
@@ -41,7 +39,7 @@ public class RegisterOperation extends Operation {
                     filePath,
                     interval, requestId);
 
-            this.udpServer.getCbList().add(newClient);
+            super.getServer().getCbList().add(newClient);
 
             replyMsg = Utils.addRequestId(requestId, Const.MESSAGE.REGISTER_SUCCESS);
             super.reply(replyMsg.getBytes());
