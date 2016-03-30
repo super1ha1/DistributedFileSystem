@@ -44,7 +44,7 @@ public class RegisteredClient {
             int avail = in.available();
             byte[] output = new byte[avail];
             int result = in.read(output);
-            responseMsg = Const.REQUEST_TYPE.CALLBACK + new String(output);
+            responseMsg = new String(output);
         }
         catch (Exception e){
             e.printStackTrace();
@@ -60,5 +60,12 @@ public class RegisteredClient {
             this.socket.send(packet);
 
         }
+    }
+
+    public void onRemove() throws Exception {
+        String responseMsg = Const.MESSAGE.REGISTER_EXPIRE;
+        DatagramPacket packet = new DatagramPacket(responseMsg.getBytes(), responseMsg.getBytes().length, this.address, this.port);
+        this.socket.send(packet);
+
     }
 }

@@ -1,6 +1,7 @@
 package utils;
 
 
+import server.Const;
 import server.UDPServer;
 
 import java.io.FileInputStream;
@@ -39,7 +40,7 @@ public class RegisterOperation extends Operation {
 
         this.udpServer.getCbList().add(newClient);
 
-        replyMsg = "You have registered successfully!";
+        replyMsg = Const.MESSAGE.REGISTER_SUCCESS;
         super.reply(replyMsg.getBytes());
 
     }

@@ -11,7 +11,9 @@ import java.net.DatagramSocket;
 
 public class UDPServerImpl {
 
-    private static  UDPServer udpServer = new UDPServer();
+    private static final int SERVER_PORT = 7777;
+    private static final int BUFFER_SIZE = 65536;
+    private static  UDPServer udpServer;
 
     public static void main(String args[])
     {
@@ -19,9 +21,10 @@ public class UDPServerImpl {
 
         try
         {
-            sock = new DatagramSocket(7777);
+            sock = new DatagramSocket(SERVER_PORT);
+            udpServer = new UDPServer(sock);
 
-            byte[] buffer = new byte[65536];
+            byte[] buffer = new byte[BUFFER_SIZE];
             DatagramPacket incoming = new DatagramPacket(buffer, buffer.length);
 
             Utils.echo("Server socket created. Waiting for incoming data...");

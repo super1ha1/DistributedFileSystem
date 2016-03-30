@@ -8,4 +8,8 @@ public class Const {
         public static final String REGISTER = "register";
         public static final String CALLBACK = "type:callback";
     }
+    public static class MESSAGE{
+        public static final String REGISTER_SUCCESS = "You have registered successfully!";
+        public static final String REGISTER_EXPIRE = "Your monitor interval has expired";
+    }
 }

@@ -13,14 +13,20 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
 public class UDPServer {
 
     private ArrayList<RegisteredClient> cbList = new ArrayList<>();
+    private String invocationSemantic;
+    private DatagramSocket socket;
+    private Map<String, Map<String, byte[]>> history = new HashMap<>();
 
-    public UDPServer(){
-
+    public UDPServer(DatagramSocket socket){
+        this.socket = socket;
     }
+
 
     public ArrayList<RegisteredClient> getCbList() {
         return cbList;
@@ -35,6 +41,7 @@ public class UDPServer {
             if(stillValid(client)){
                 client.onCallBack();
             }else {
+                client.onRemove();
                 this.cbList.remove(client);
             }
         }
@@ -43,5 +50,13 @@ public class UDPServer {
     // valid = registerTime  + interval >= currentTime
     private boolean stillValid(RegisteredClient client) {
         return client.getRegisteredTime() + client.getNumSeconds() >= (System.currentTimeMillis()/1000);
+    }
+
+    public DatagramSocket getSocket() {
+        return socket;
+    }
+
+    public Map<String, Map<String, byte[]>> getHistory() {
+        return history;
     }
 }

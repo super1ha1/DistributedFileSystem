@@ -20,5 +20,6 @@ write "E:\IdeaProjects\codeforces\in.txt" 1 "b"
 3) register
 init: in.txt: acd
 
-register "E:\IdeaProjects\codeforces\in.txt" 100
+register "E:\IdeaProjects\codeforces\in.txt" 20
+register "E:\IdeaProjects\codeforces\in.txt" 10000
 write "E:\IdeaProjects\codeforces\in.txt" 0 "z"
