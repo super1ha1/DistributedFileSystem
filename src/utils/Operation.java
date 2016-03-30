@@ -9,26 +9,47 @@ import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Random;
 
 public abstract class Operation {
+
+    private static final int WRONG_PORT = 3000;
+    private static final boolean SIMULATE = true; //simulate to control the reply failure
 
     private UDPServer server;
     private int requestId;
     private DatagramSocket socket;
     private DatagramPacket incoming;
     private DatagramPacket reply;
+    private static Random randomGenerator = new Random();
+
 
     public Operation(DatagramSocket socket, DatagramPacket incoming, UDPServer server, int requestId){
         this.socket = socket;
         this.incoming = incoming;
         this.server = server;
         this.requestId = requestId;
+        randomGenerator.setSeed(0);
     }
 
     public void reply(byte [] array) throws Exception{
         this.reply = new DatagramPacket(array, array.length, incoming.getAddress(), incoming.getPort());
         Utils.echo("Reply: " + new String(array));
-        socket.send(reply);
+
+        if(SIMULATE){
+//            int random = randomGenerator.nextInt(1000);
+//            Utils.echo("Random number: " + random);
+//
+//            // Use a random number to control the result of request
+//            if(random % 2 == 0){
+//                socket.send(reply); //send to correct port
+//            }else {
+//                reply = new DatagramPacket(array,array.length, incoming.getAddress(), WRONG_PORT);
+//                socket.send(reply); // send to wrong port
+//            }
+        }else {
+            socket.send(reply);
+        }
 
         if(this.server.isAtMostOne()){
             this.server.recordAReply(incoming.getAddress(), incoming.getPort(), requestId, array);

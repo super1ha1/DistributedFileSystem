@@ -99,7 +99,7 @@ public class UDPClientImpl {
         retransmit = true;
         byte[] b = requestStr.getBytes();
         DatagramPacket dp = new DatagramPacket(b , b.length , client.getHost() , client.getPort());
-        if(SIMULATE){
+        if(SIMULATE){ //simulate to control failure when send
             int random = randomGenerator.nextInt(1000);
             Utils.echo("Random number: " + random);
 
