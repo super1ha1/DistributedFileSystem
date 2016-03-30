@@ -31,9 +31,15 @@ public class GetLastUpdateOperation extends Operation {
             exceptionMsg = Utils.addRequestId(requestId, "Error: file not exist");
             super.reply(exceptionMsg.getBytes());
         }else {
-            File file = new File(filePath);
-            long lastUpdate = file.lastModified()/1000;
-            super.reply(Utils.addRequestId(requestId, String.valueOf(lastUpdate)).getBytes());
+            try {
+                File file = new File(filePath);
+                long lastUpdate = file.lastModified()/1000;
+                super.reply(Utils.addRequestId(requestId, String.valueOf(lastUpdate)).getBytes());
+            } catch (Exception e){
+                e.printStackTrace();
+                exceptionMsg = Utils.addRequestId(requestId, "Error: Exception");
+                super.reply(exceptionMsg.getBytes());
+            }
         }
 
     }

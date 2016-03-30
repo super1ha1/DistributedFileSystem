@@ -34,16 +34,22 @@ public class RegisterOperation extends Operation {
         String filePath = firstSplit[1];
         long interval  = Integer.valueOf(firstSplit[2].trim());
 
-        RegisteredClient newClient = new RegisteredClient(
-                super.getSocket(),
-                super.getIncoming().getAddress(), super.getIncoming().getPort(),
-                filePath,
-                interval, requestId);
+        try {
+            RegisteredClient newClient = new RegisteredClient(
+                    super.getSocket(),
+                    super.getIncoming().getAddress(), super.getIncoming().getPort(),
+                    filePath,
+                    interval, requestId);
 
-        this.udpServer.getCbList().add(newClient);
+            this.udpServer.getCbList().add(newClient);
 
-        replyMsg = Utils.addRequestId(requestId, Const.MESSAGE.REGISTER_SUCCESS);
-        super.reply(replyMsg.getBytes());
+            replyMsg = Utils.addRequestId(requestId, Const.MESSAGE.REGISTER_SUCCESS);
+            super.reply(replyMsg.getBytes());
 
+        } catch (Exception e){
+            e.printStackTrace();
+            String exceptionMsg = Utils.addRequestId(requestId, "Error: Exception");
+            super.reply(exceptionMsg.getBytes());
+        }
     }
 }

@@ -85,6 +85,11 @@ public class UDPServerImpl {
                 getLastUpdateOperation.process();
                 break;
 
+            case Const.REQUEST_TYPE.READ_ALL_FILE:
+                ReadAllFileOperation readAllFileOperation = new ReadAllFileOperation(sock, incoming);
+                readAllFileOperation.process();
+                break;
+
             default:
                 String errorMsg = Utils.addRequestId(requestId, "Error: command is not recognized");
                 DatagramPacket packet = new DatagramPacket(errorMsg.getBytes(), errorMsg.getBytes().length,

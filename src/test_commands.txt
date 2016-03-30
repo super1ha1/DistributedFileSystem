@@ -38,3 +38,8 @@ append "E:\IdeaProjects\codeforces\in.txt" "xyz"
 init: in.txt: acd
 get_last_update "E:\IdeaProjects\codeforces\a.txt"
 get_last_update "E:\IdeaProjects\codeforces\in.txt"
+
+6) Read all file operation
+init: in.txt: acd
+read_all "E:\IdeaProjects\codeforces\a.txt"
+read_all "E:\IdeaProjects\codeforces\in.txt"
