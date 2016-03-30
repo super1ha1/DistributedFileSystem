@@ -3,6 +3,7 @@ package utils;
 
 import server.UDPServer;
 
+import javax.rmi.CORBA.Util;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -26,15 +27,18 @@ public class WriteOperation  extends Operation{
         byte[] data = super.getIncoming().getData();
         String command = new String(data, 0, getIncoming().getLength());
 
-        //write "file_path" offset "content"
-        String [] arrayStr = command.trim().split("\"");
 
-        String filePath = arrayStr[1];
-        int offset = Integer.valueOf(arrayStr[2].trim().replaceAll("( )+", " ").split(" ")[0]);
-        String insert = arrayStr[3];
+        // 1 write "file_path" offset "content"
+        String [] firstSplit = command.trim().split("\"");
+        String [] secondSplit = firstSplit[0].trim().replaceAll("( )+", " ").split(" ");//Split of: 1 write
+        int requestId = Integer.valueOf(secondSplit[0].trim());
+
+        String filePath = firstSplit[1];
+        int offset = Integer.valueOf(firstSplit[2].trim());
+        String insert = firstSplit[3];
 
         if(Files.notExists(Paths.get(filePath))){
-            replyMsg = "Error: file not exist";
+            replyMsg = Utils.addRequestId(requestId, "Error: file not exist");
             super.reply(replyMsg.getBytes());
         }else {
             FileInputStream in = null;
@@ -44,7 +48,7 @@ public class WriteOperation  extends Operation{
 
                 int avail = in.available();
                 if(offset >= avail){
-                    replyMsg = "Error: offset larger than length, offset: " + offset  + " len: " + avail;
+                    replyMsg = Utils.addRequestId(requestId, "Error: offset larger than length, offset: " + offset  + " len: " + avail);
                     super.reply(replyMsg.getBytes());
                     return;
                 }
@@ -57,14 +61,14 @@ public class WriteOperation  extends Operation{
                 out = new FileOutputStream(filePath, false);
                 out.write(currentContent.getBytes());
 
-                replyMsg = "Write to file successfully!";
+                replyMsg = Utils.addRequestId(requestId,  "Write to file successfully!");
                 super.reply(replyMsg.getBytes());
 
                 this.udpServer.onFileChanged();
 
             } catch (Exception e){
 
-                replyMsg = "Error: Exception when writing";
+                replyMsg = Utils.addRequestId(requestId, "Error: Exception when writing");
                 super.reply(replyMsg.getBytes());
                 e.printStackTrace();
 

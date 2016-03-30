@@ -20,9 +20,10 @@ public class UDPClientImpl {
         UDPClient client = new UDPClient();
         DatagramSocket sock = null;
         int port = 7777;
-        String s;
+        String requestStr, replyStr;
         BufferedReader cin = new BufferedReader(new InputStreamReader(System.in));
-        int registerInterval = -1;
+        int requestIdInReply;
+        String replyContent;
         try
         {
             sock = new DatagramSocket();
@@ -34,21 +35,15 @@ public class UDPClientImpl {
                 if(!client.isRegistered()){
                     //take input and send the packet
                     Utils.echo("Enter command or -1 to terminate : ");
-                    s = (String)cin.readLine();
-                    if(s.trim().equals("-1")){
+                    requestStr =  cin.readLine();
+                    if(requestStr.trim().equals("-1")){
                         break;
                     }
-                    byte[] b = s.getBytes();
+                    requestStr = client.getRequestId() + " " + requestStr;
+                    byte[] b = requestStr.getBytes();
                     DatagramPacket dp = new DatagramPacket(b , b.length , host , port);
                     sock.send(dp);
 
-                    // register "file_path" 100
-                    String [] arrayStr = s.trim().split("\"");
-
-                    String commandCode = arrayStr[0].trim().replaceAll("( )+", " ");
-                    if(commandCode.equals("register")){
-                        registerInterval = Integer.valueOf(arrayStr[2].trim().replaceAll("( )+", " "));
-                    }
                 }
 
                 //now receive reply
@@ -58,17 +53,26 @@ public class UDPClientImpl {
                 sock.receive(reply);
 
                 byte[] data = reply.getData();
-                s = new String(data, 0, reply.getLength());
 
-                if(s.equals(Const.MESSAGE.REGISTER_SUCCESS)){
+                //Sample reply: 1 "this is the reply"
+                replyStr = new String(data, 0, reply.getLength());
+
+                String [] array = replyStr.trim().split("\"");
+                requestIdInReply = Integer.valueOf(array[0].trim());
+                replyContent = array[1].trim();
+
+
+                if(replyContent.equals(Const.MESSAGE.REGISTER_SUCCESS)){
                     client.setRegistered(true);
-                }
-
-                if(s.equals(Const.MESSAGE.REGISTER_EXPIRE)){
+                } else if(replyContent.equals(Const.MESSAGE.REGISTER_EXPIRE)) {
                     client.setRegistered(false);
                 }
 
-                Utils.echo(reply.getAddress().getHostAddress() + " : " + reply.getPort() + " - " + s);
+                if(requestIdInReply == client.getRequestId()){
+                    client.increaseRequestId();
+                }
+
+                Utils.echo(reply.getAddress().getHostAddress() + " : " + reply.getPort() + " - " + requestIdInReply + " : " + replyContent);
 
             }
         }
@@ -78,5 +82,6 @@ public class UDPClientImpl {
             System.err.println("IOException " + e);
         }
     }
+
 
 }

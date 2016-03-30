@@ -1,7 +1,7 @@
 29/03
 1) code read
 define request :
-read "file_path" offset length
+id read "file_path" offset length
 
 "file_path": is absolute path, may contain space
 
@@ -10,9 +10,14 @@ update interface
 
 2) code write
 define request:
-write "file_path" offset "content"
+id write "file_path" offset "content"
 
 
 3) register callback
 define request
-register "file_path" num_second
+id register "file_path" num_second
+
+
+Response:
+
+id "content"

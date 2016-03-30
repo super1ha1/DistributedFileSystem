@@ -6,6 +6,7 @@ import utils.RegisterOperation;
 import utils.Utils;
 import utils.WriteOperation;
 
+import javax.rmi.CORBA.Util;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 
@@ -32,8 +33,12 @@ public class UDPServerImpl {
             //communication loop
             while(true)
             {
-                sock.receive(incoming);
-                processCommand(sock, incoming);
+                try {
+                    sock.receive(incoming);
+                    processCommand(sock, incoming);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
 
             }
         }
@@ -41,6 +46,7 @@ public class UDPServerImpl {
         catch(Exception e)
         {
             System.err.println("IOException " + e);
+            e.printStackTrace();
         }
     }
 
@@ -51,8 +57,11 @@ public class UDPServerImpl {
         //echo the details of incoming data - client ip : client port - client message
         Utils.echo("Request: " + incoming.getAddress().getHostAddress() + " : " + incoming.getPort() + " - " + command);
 
+        // 1 read "file.txt" 0 10
         String [] firstSplit = command.trim().split("\"");
-        String action = firstSplit[0].trim();
+        String [] secondSplit = firstSplit[0].trim().replaceAll("( )+", " ").split(" ");
+        int requestId = Integer.valueOf(secondSplit[0].trim());
+        String action = secondSplit[1].trim();
         switch (action){
             case Const.REQUEST_TYPE.READ:
                 ReadOperation readOperation = new ReadOperation(sock, incoming);
@@ -71,7 +80,7 @@ public class UDPServerImpl {
 
 
             default:
-                String errorMsg = "Error: command is not recognized";
+                String errorMsg = Utils.addRequestId(requestId, "Error: command is not recognized");
                 DatagramPacket packet = new DatagramPacket(errorMsg.getBytes(), errorMsg.getBytes().length,
                         incoming.getAddress(), incoming.getPort());
                 sock.send(packet);

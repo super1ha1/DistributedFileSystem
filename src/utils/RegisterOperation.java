@@ -26,11 +26,13 @@ public class RegisterOperation extends Operation {
         byte[] data = super.getIncoming().getData();
         String command = new String(data, 0, getIncoming().getLength());
 
-        // register "file_path" 100
-        String [] arrayStr = command.trim().split("\"");
+        // 1 register "file_path" 100
+        String [] firstSplit = command.trim().split("\"");
+        String [] secondSplit = firstSplit[0].trim().replaceAll("( )+", " ").split(" ");//Split of: 1 register
+        int requestId = Integer.valueOf(secondSplit[0].trim());
 
-        String filePath = arrayStr[1];
-        long interval  = Integer.valueOf(arrayStr[2].trim().replaceAll("( )+", " "));
+        String filePath = firstSplit[1];
+        long interval  = Integer.valueOf(firstSplit[2].trim());
 
         RegisteredClient newClient = new RegisteredClient(
                 super.getSocket(),
@@ -40,7 +42,7 @@ public class RegisterOperation extends Operation {
 
         this.udpServer.getCbList().add(newClient);
 
-        replyMsg = Const.MESSAGE.REGISTER_SUCCESS;
+        replyMsg = Utils.addRequestId(requestId, Const.MESSAGE.REGISTER_SUCCESS);
         super.reply(replyMsg.getBytes());
 
     }
