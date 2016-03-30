@@ -15,4 +15,8 @@ public class Utils {
     public static String encodeAddressAndPortToKey(InetAddress address, int port) {
         return address.toString() + ":" + port;
     }
+
+    public static String composeRequest(int requestId, String requestStr) {
+        return requestId + " " + requestStr;
+    }
 }

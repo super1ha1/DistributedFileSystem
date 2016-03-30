@@ -14,7 +14,7 @@ import java.util.Random;
 public abstract class Operation {
 
     private static final int WRONG_PORT = 3000;
-    private static final boolean SIMULATE = true; //simulate to control the reply failure
+    private static final boolean SIMULATE = false; //simulate to control the reply failure
 
     private UDPServer server;
     private int requestId;
@@ -37,16 +37,16 @@ public abstract class Operation {
         Utils.echo("Reply: " + new String(array));
 
         if(SIMULATE){
-//            int random = randomGenerator.nextInt(1000);
-//            Utils.echo("Random number: " + random);
-//
-//            // Use a random number to control the result of request
-//            if(random % 2 == 0){
-//                socket.send(reply); //send to correct port
-//            }else {
-//                reply = new DatagramPacket(array,array.length, incoming.getAddress(), WRONG_PORT);
-//                socket.send(reply); // send to wrong port
-//            }
+            int random = randomGenerator.nextInt(1000);
+            Utils.echo("Random number: " + random);
+
+            // Use a random number to control the result of request
+            if(random % 2 == 0){
+                socket.send(reply); //send to correct port
+            }else {
+                reply = new DatagramPacket(array,array.length, incoming.getAddress(), WRONG_PORT);
+                socket.send(reply); // send to wrong port
+            }
         }else {
             socket.send(reply);
         }

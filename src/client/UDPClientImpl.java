@@ -12,29 +12,29 @@ import java.util.Random;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
-import java.util.logging.Handler;
 
 public class UDPClientImpl {
+    private static final boolean SIMULATE = false;
     private static BufferedReader cin = new BufferedReader(new InputStreamReader(System.in));
-    private static final boolean SIMULATE = true;
     private static final int WRONG_PORT = 3000;
+    public static final int FIRST_ID = 0;
+
     private static Random randomGenerator = new Random();
     private static UDPClient client;
-    private static String requestStr, replyStr,replyContent;
-    private static int requestIdInReply;
+    private static String requestStr;
     private static boolean retransmit = false;
-    private  static  byte[] buffer;
     private static ScheduledExecutorService service = Executors.newSingleThreadScheduledExecutor();
+
+    private static int currentRequestId = FIRST_ID;
+
     public static void main(String args[])
     {
         randomGenerator.setSeed(1);
         try
         {
             client = startClient();
-
             while(true)
             {
-
                 try {
                     if(!client.isRegistered()){
                         Utils.echo("Enter command or -1 to terminate : ");
@@ -42,12 +42,8 @@ public class UDPClientImpl {
                         if(requestStr.trim().equals("-1")){
                             break;
                         }
-                        requestStr = client.getRequestId() + " " + requestStr;
-                        sendACommand(requestStr);
+                        client.processCommand(requestStr);
                     }
-
-                    retransmit = receiveReply();
-
                 }
                 catch (Exception e) {
                     e.printStackTrace();
@@ -62,19 +58,19 @@ public class UDPClientImpl {
         }
     }
 
-    private static boolean receiveReply() throws Exception{
-        buffer = new byte[65536];
+    private static boolean receiveReply(int requestId) throws Exception{
+        byte[] buffer = new byte[65536];
         DatagramPacket reply = new DatagramPacket(buffer, buffer.length);
         client.getSocket().receive(reply);
 
         byte[] data = reply.getData();
 
         //Sample reply: 1 "this is the reply"
-        replyStr = new String(data, 0, reply.getLength());
+        String replyStr = new String(data, 0, reply.getLength());
 
         String [] array = replyStr.trim().split("\"");
-        requestIdInReply = Integer.valueOf(array[0].trim());
-        replyContent = array[1].trim();
+        int requestIdInReply = Integer.valueOf(array[0].trim());
+        String replyContent = array[1].trim();
 
         // Update registered
         if(replyContent.equals(Const.MESSAGE.REGISTER_SUCCESS)){
@@ -85,20 +81,35 @@ public class UDPClientImpl {
 
         Utils.echo(reply.getAddress().getHostAddress() + " : " + reply.getPort() + " - " + requestIdInReply + " : " + replyContent);
 
-        if(requestIdInReply == client.getRequestId()){ //only when receive a reply with request id match
-            client.increaseRequestId();
+        if(requestIdInReply == requestId){ //only when receive a reply with request id match
+            currentRequestId++;
             return false;
         }else {
-            Utils.echo("requestId " +  client.getRequestId() + " does not match with requestID in reply " + requestIdInReply);
+            Utils.echo("requestId " +  requestId + " does not match with requestID in reply " + requestIdInReply);
             return true;
         }
 
     }
 
-    private static void sendACommand(String requestStr) throws Exception {
+    private static void sendACommand(int requestId, String requestStr) throws Exception {
         retransmit = true;
-        byte[] b = requestStr.getBytes();
+        final String composedRequestStr = Utils.composeRequest(requestId, requestStr);
+        byte[] b = composedRequestStr.getBytes();
         DatagramPacket dp = new DatagramPacket(b , b.length , client.getHost() , client.getPort());
+
+//        if(client.isReadOperation(composedRequestStr)){
+//            client.setFilePathOffsetAndLength(composedRequestStr);
+//            if(client.hasFileInCache()){
+//                if(client.dataIsFresh()){
+//                    client.showData();
+//                }else {
+//                    client.fetchLatestUpdate();
+//                    client.processLatestUpdate();
+//                }
+//                return;
+//            }
+//        }
+
         if(SIMULATE){ //simulate to control failure when send
             int random = randomGenerator.nextInt(1000);
             Utils.echo("Random number: " + random);
@@ -114,7 +125,6 @@ public class UDPClientImpl {
             client.getSocket().send(dp);
         }
 
-        final String finalRequestStr = requestStr;
         service.schedule(new Runnable() {
             @Override
             public void run() {
@@ -122,7 +132,7 @@ public class UDPClientImpl {
                     Utils.echo("Hello, in runnable here!, retransmit: " + retransmit);
                     if(retransmit){
                         Utils.echo("resend requestId: " + client.getRequestId());
-                        sendACommand(finalRequestStr);
+                        sendACommand(requestId, requestStr);
                     }
                 } catch (Exception e) {
                     e.printStackTrace();
