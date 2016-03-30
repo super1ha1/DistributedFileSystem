@@ -17,14 +17,16 @@ public class RegisteredClient {
     private String filePath;
     private long numSeconds;
     private long registeredTime;
+    private int lastRequestId;
 
-    public RegisteredClient(DatagramSocket socket, InetAddress address, int port, String filePath, long numSeconds){
+    public RegisteredClient(DatagramSocket socket, InetAddress address, int port, String filePath, long numSeconds, int lastRequestId){
         this.address = address;
         this.port = port;
         this.filePath = filePath;
         this.numSeconds = numSeconds;
         this.registeredTime = System.currentTimeMillis() / 1000;
         this.socket = socket;
+        this.lastRequestId = lastRequestId;
     }
 
     public long getRegisteredTime() {
@@ -44,11 +46,12 @@ public class RegisteredClient {
             int avail = in.available();
             byte[] output = new byte[avail];
             int result = in.read(output);
-            responseMsg = new String(output);
+            responseMsg = Utils.addRequestId(this.lastRequestId, new String(output));
+
         }
         catch (Exception e){
             e.printStackTrace();
-            responseMsg = "Error: IndexOutOfBoundsException";
+            responseMsg = Utils.addRequestId(this.lastRequestId, "Error: IndexOutOfBoundsException");
 
         }
         finally {
@@ -63,7 +66,7 @@ public class RegisteredClient {
     }
 
     public void onRemove() throws Exception {
-        String responseMsg = Const.MESSAGE.REGISTER_EXPIRE;
+        String responseMsg = Utils.addRequestId(this.lastRequestId, Const.MESSAGE.REGISTER_EXPIRE);
         DatagramPacket packet = new DatagramPacket(responseMsg.getBytes(), responseMsg.getBytes().length, this.address, this.port);
         this.socket.send(packet);
 

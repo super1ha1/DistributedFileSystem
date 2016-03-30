@@ -18,6 +18,10 @@ define request
 id register "file_path" num_second
 
 
-Response:
+4) append to the end a a file
+define request:
+id append "file_path" "content"
 
+
+Response:
 id "content"

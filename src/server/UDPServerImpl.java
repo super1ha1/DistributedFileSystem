@@ -1,10 +1,7 @@
 package server;
 
 
-import utils.ReadOperation;
-import utils.RegisterOperation;
-import utils.Utils;
-import utils.WriteOperation;
+import utils.*;
 
 import javax.rmi.CORBA.Util;
 import java.net.DatagramPacket;
@@ -78,6 +75,10 @@ public class UDPServerImpl {
                 registerOperation.process();
                 break;
 
+            case Const.REQUEST_TYPE.APPEND:
+                AppendOperation appendOperation = new AppendOperation(sock, incoming, udpServer);
+                appendOperation.process();
+                break;
 
             default:
                 String errorMsg = Utils.addRequestId(requestId, "Error: command is not recognized");
