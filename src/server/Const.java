@@ -8,6 +8,7 @@ public class Const {
         public static final String REGISTER = "register";
         public static final String CALLBACK = "callback";
         public static final String APPEND = "append";
+        public static final String LAST_UPDATE = "get_last_update";
     }
     public static class MESSAGE{
         public static final String REGISTER_SUCCESS = "You have registered successfully!";

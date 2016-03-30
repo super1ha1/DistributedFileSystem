@@ -80,6 +80,11 @@ public class UDPServerImpl {
                 appendOperation.process();
                 break;
 
+            case Const.REQUEST_TYPE.LAST_UPDATE:
+                GetLastUpdateOperation getLastUpdateOperation = new GetLastUpdateOperation(sock, incoming);
+                getLastUpdateOperation.process();
+                break;
+
             default:
                 String errorMsg = Utils.addRequestId(requestId, "Error: command is not recognized");
                 DatagramPacket packet = new DatagramPacket(errorMsg.getBytes(), errorMsg.getBytes().length,

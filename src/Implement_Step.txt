@@ -23,5 +23,9 @@ define request:
 id append "file_path" "content"
 
 
+5) get last_update_time of a file (return Unix time)
+define request:
+id get_last_update "file_path"
+
 Response:
 id "content"

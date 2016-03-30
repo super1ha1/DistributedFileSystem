@@ -28,6 +28,13 @@ write "E:\IdeaProjects\codeforces\in.txt" 0 "z"
 
 4) Append 
 init: in.txt: acd
+register "E:\IdeaProjects\codeforces\in.txt" 10000
 append "E:\IdeaProjects\codeforces\a.txt" "z"
 append "E:\IdeaProjects\codeforces\in.txt" "z"
 append "E:\IdeaProjects\codeforces\in.txt" "xyz"
+
+
+5) Get last update in Unix time (seconds)
+init: in.txt: acd
+get_last_update "E:\IdeaProjects\codeforces\a.txt"
+get_last_update "E:\IdeaProjects\codeforces\in.txt"
