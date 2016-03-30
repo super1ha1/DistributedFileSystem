@@ -3,18 +3,14 @@ package utils;
 
 import server.UDPServer;
 
-import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
-import java.net.InetAddress;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Random;
 
 public abstract class Operation {
 
     private static final int WRONG_PORT = 3000;
-    private static final boolean SIMULATE = false; //simulate to control the reply failure
+    private static final boolean SIMULATE_RETRANSMIT = false; //simulate to control the reply failure
 
     private UDPServer server;
     private int requestId;
@@ -29,16 +25,20 @@ public abstract class Operation {
         this.incoming = incoming;
         this.server = server;
         this.requestId = requestId;
-        randomGenerator.setSeed(0);
+        /*
+        Set seed 0 > get 360
+        set seed 1 > always get 959
+         */
+        randomGenerator.setSeed(1);
     }
 
     public void reply(byte [] array) throws Exception{
         this.reply = new DatagramPacket(array, array.length, incoming.getAddress(), incoming.getPort());
         Utils.echo("Reply: " + new String(array));
 
-        if(SIMULATE){
+        if(SIMULATE_RETRANSMIT){
             int random = randomGenerator.nextInt(1000);
-            Utils.echo("Random number: " + random);
+            Utils.echo("Random number: " + random + " reply sent: " + (random % 2 == 0 ? " success " : " lost "));
 
             // Use a random number to control the result of request
             if(random % 2 == 0){
@@ -85,4 +85,6 @@ public abstract class Operation {
     public UDPServer getServer() {
         return server;
     }
+
+
 }

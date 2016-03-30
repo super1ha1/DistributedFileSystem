@@ -8,7 +8,9 @@ import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.net.DatagramPacket;
 import java.net.InetAddress;
+import java.util.HashSet;
 import java.util.Random;
+import java.util.Set;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -42,7 +44,9 @@ public class UDPClientImpl {
                         if(requestStr.trim().equals("-1")){
                             break;
                         }
-                        client.processCommand(requestStr);
+                        client.processCommand(requestStr, null);
+                    }else {
+                        client.setRetransmit(client.receiveReply());
                     }
                 }
                 catch (Exception e) {
@@ -56,89 +60,6 @@ public class UDPClientImpl {
             System.err.println("Exception " + e);
             e.printStackTrace();
         }
-    }
-
-    private static boolean receiveReply(int requestId) throws Exception{
-        byte[] buffer = new byte[65536];
-        DatagramPacket reply = new DatagramPacket(buffer, buffer.length);
-        client.getSocket().receive(reply);
-
-        byte[] data = reply.getData();
-
-        //Sample reply: 1 "this is the reply"
-        String replyStr = new String(data, 0, reply.getLength());
-
-        String [] array = replyStr.trim().split("\"");
-        int requestIdInReply = Integer.valueOf(array[0].trim());
-        String replyContent = array[1].trim();
-
-        // Update registered
-        if(replyContent.equals(Const.MESSAGE.REGISTER_SUCCESS)){
-            client.setRegistered(true);
-        } else if(replyContent.equals(Const.MESSAGE.REGISTER_EXPIRE)) {
-            client.setRegistered(false);
-        }
-
-        Utils.echo(reply.getAddress().getHostAddress() + " : " + reply.getPort() + " - " + requestIdInReply + " : " + replyContent);
-
-        if(requestIdInReply == requestId){ //only when receive a reply with request id match
-            currentRequestId++;
-            return false;
-        }else {
-            Utils.echo("requestId " +  requestId + " does not match with requestID in reply " + requestIdInReply);
-            return true;
-        }
-
-    }
-
-    private static void sendACommand(int requestId, String requestStr) throws Exception {
-        retransmit = true;
-        final String composedRequestStr = Utils.composeRequest(requestId, requestStr);
-        byte[] b = composedRequestStr.getBytes();
-        DatagramPacket dp = new DatagramPacket(b , b.length , client.getHost() , client.getPort());
-
-//        if(client.isReadOperation(composedRequestStr)){
-//            client.setFilePathOffsetAndLength(composedRequestStr);
-//            if(client.hasFileInCache()){
-//                if(client.dataIsFresh()){
-//                    client.showData();
-//                }else {
-//                    client.fetchLatestUpdate();
-//                    client.processLatestUpdate();
-//                }
-//                return;
-//            }
-//        }
-
-        if(SIMULATE){ //simulate to control failure when send
-            int random = randomGenerator.nextInt(1000);
-            Utils.echo("Random number: " + random);
-
-            // Use a random number to control the result of request
-            if(random % 2 == 0){
-                client.getSocket().send(dp); //send to correct port
-            }else {
-                dp = new DatagramPacket(b,b.length, client.getHost(), WRONG_PORT);
-                client.getSocket().send(dp); // send to wrong port
-            }
-        }else {
-            client.getSocket().send(dp);
-        }
-
-        service.schedule(new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    Utils.echo("Hello, in runnable here!, retransmit: " + retransmit);
-                    if(retransmit){
-                        Utils.echo("resend requestId: " + client.getRequestId());
-                        sendACommand(requestId, requestStr);
-                    }
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-            }
-        }, client.getRetransmitInterval(), TimeUnit.SECONDS);
     }
 
     private static UDPClient startClient() throws Exception {

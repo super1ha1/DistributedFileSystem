@@ -2,12 +2,12 @@ package client;
 
 public class CacheEntry {
     private byte [] content;
-    private long lastValidateTime, lastModifiedTime;
+    private long lastValidateTime, lastModifiedTime, serverModifyTime;
 
     public CacheEntry(byte[] content,  long lastValidateTime, long lastModifiedTime) {
         this.content = content;
-        this.lastModifiedTime = lastModifiedTime;
         this.lastValidateTime = lastValidateTime;
+        this.lastModifiedTime = lastModifiedTime;
     }
 
     public byte[] getContent() {
@@ -32,5 +32,21 @@ public class CacheEntry {
 
     public void setLastValidateTime(long lastValidateTime) {
         this.lastValidateTime = lastValidateTime;
+    }
+
+    public long getServerModifyTime() {
+        return serverModifyTime;
+    }
+
+    public void setServerModifyTime(long serverModifyTime) {
+        this.serverModifyTime = serverModifyTime;
+    }
+
+    public boolean isValid() {
+        return lastModifiedTime == serverModifyTime;
+    }
+
+    public boolean dataIsFresh(long cacheInterval) {
+        return (System.currentTimeMillis()/1000) - lastValidateTime < cacheInterval ;
     }
 }

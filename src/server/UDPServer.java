@@ -19,7 +19,7 @@ import java.util.Map;
 
 public class UDPServer {
 
-    private ArrayList<RegisteredClient> cbList = new ArrayList<>();
+    private Map<String, RegisteredClient> cbMap = new HashMap<>();
     private String invocationSemantic;
     private DatagramSocket socket;
     private Map<String, Map<String, byte[]>> history = new HashMap<>();
@@ -29,21 +29,15 @@ public class UDPServer {
     }
 
 
-    public ArrayList<RegisteredClient> getCbList() {
-        return cbList;
-    }
-
-    public void setCbList(ArrayList<RegisteredClient> cbList) {
-        this.cbList = cbList;
-    }
-
     public void onFileChanged() throws Exception{
-        for( RegisteredClient client: cbList){
+
+        for( String key: cbMap.keySet()){
+            RegisteredClient client = cbMap.get(key);
             if(stillValid(client)){
                 client.onCallBack();
             }else {
                 client.onRemove();
-                this.cbList.remove(client);
+                cbMap.remove(key);
             }
         }
     }
@@ -113,4 +107,7 @@ public class UDPServer {
 
     }
 
+    public Map<String, RegisteredClient> getCbMap() {
+        return cbMap;
+    }
 }

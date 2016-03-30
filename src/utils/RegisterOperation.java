@@ -39,8 +39,9 @@ public class RegisterOperation extends Operation {
                     filePath,
                     interval, requestId);
 
-            super.getServer().getCbList().add(newClient);
+            String key = Utils.encodeAddressAndPortToKey(super.getIncoming().getAddress(), super.getIncoming().getPort());
 
+            super.getServer().getCbMap().put(key, newClient);
             replyMsg = Utils.addRequestId(requestId, Const.MESSAGE.REGISTER_SUCCESS);
             super.reply(replyMsg.getBytes());
 

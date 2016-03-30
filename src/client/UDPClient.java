@@ -2,6 +2,7 @@ package client;
 
 
 import server.Const;
+import utils.CacheCallBack;
 import utils.Utils;
 
 import java.io.ByteArrayInputStream;
@@ -9,9 +10,7 @@ import java.io.InputStream;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Random;
+import java.util.*;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -20,12 +19,13 @@ public class UDPClient implements CallBack {
 
     private static final int SENTINEL = -1;
     public static final int FIRST_ID = 0;
-    private static final boolean SIMULATE = false;
+    private static final boolean SIMULATE_RETRANSMIT = false;
     private static final int WRONG_PORT = 3000;
 
 
     private static Random randomGenerator = new Random();
     private static ScheduledExecutorService service = Executors.newSingleThreadScheduledExecutor();
+    private Map<Integer, CacheCallBack> requestCallBackMap = new HashMap<>();
 
     private InetAddress host;
     private int port;
@@ -35,8 +35,6 @@ public class UDPClient implements CallBack {
     private boolean registered;
     private int requestId;
 
-    private String filePath;
-    private int offset, length;
     private Map<String, CacheEntry> cache = new HashMap<>();
     private boolean retransmit;
     private int nextRequestId = FIRST_ID;
@@ -103,7 +101,7 @@ public class UDPClient implements CallBack {
         return socket;
     }
 
-    public boolean isReadOperation(String requestStr) {
+    private boolean isReadOperation(String requestStr) {
         // 1 read "file" 0 10
         // 1 read_all "file" 0 10
         String [] firstSplit = requestStr.trim().split("\"");
@@ -113,35 +111,19 @@ public class UDPClient implements CallBack {
         return action.equals(Const.REQUEST_TYPE.READ);
     }
 
-    public void setFilePathOffsetAndLength(String requestStr) {
-        // 1 read "file" 0 10
-        String [] firstSplit = requestStr.trim().split("\"");
-
-        String [] secondSplit = firstSplit[0].trim().replaceAll("( )+", " ").split(" ");//Split of: 1 read
-        String [] thirdSplit = firstSplit[2].trim().replaceAll("( )+", " ").split(" "); //split of:  0 10
-
-        int requestId = Integer.valueOf(secondSplit[0].trim());
-        this.filePath = firstSplit[1];
-        this.offset = Integer.valueOf(thirdSplit[0].trim());
-        this.length = Integer.valueOf(thirdSplit[1].trim());
+    private boolean hasFileInCache(String filePath) {
+        return cache.keySet().contains(filePath);
     }
 
-    public boolean hasFileInCache() {
-        return this.cache.keySet().contains(filePath);
-    }
+    private void getDataFromCache(CacheEntry entry, int offset, int length) throws Exception {
+        Utils.echo("Get data from cache: " + " data: " + new String(entry.getContent()) +
+                " offset " + offset + " len: " + length);
 
-    public boolean dataIsFresh() {
-        CacheEntry entry = cache.get(filePath);
-        return (System.currentTimeMillis()/1000) - entry.getLastValidateTime() < cacheRefreshInterval;
-    }
-
-    public void showData() throws Exception {
-        CacheEntry entry = cache.get(filePath);
         InputStream in = new ByteArrayInputStream(entry.getContent());
 
         int avail = in.available();
         if(offset >= avail ){
-            Utils.echo("Request: " + requestId +  "Error: offset larger than length: offset " + offset + " len: " + avail);
+            Utils.echo("Request: " + requestId +  " Error: offset larger than length: offset " + offset + " len: " + avail);
             return;
         }
 
@@ -151,42 +133,72 @@ public class UDPClient implements CallBack {
         }
 
         int result = in.read(output, 0, length); //  read from input stream, fill in from index 0 to length of output
-        Utils.echo("Request: " + requestId + "Read from cache: " + new String(output));
+        Utils.echo("Request: " + requestId + " Read from cache: " + new String(output));
     }
 
-    public void fetchLatestUpdate() {
-        String request = composeReadAllRequest();
-
+    private void fetchLatestUpdate(String filePath, int offset, int length) throws Exception{
+        String request = composeGetLastUpdate( filePath);
+        Utils.echo("request to fetch lastest time: " + request);
+        CacheCallBack cacheCallBack = new CacheCallBack() {
+            @Override
+            public void onDataReceive(String data) throws Exception{
+                Utils.echo("fetch lastest time success: " + data);
+                CacheEntry entry =  cache.get(filePath);
+                long newUpdateTime = Integer.valueOf(data.trim());
+                entry.setServerModifyTime(newUpdateTime);
+                processLatestUpdate(filePath, offset, length);
+            }
+        };
+        processCommand(request, cacheCallBack);
     }
 
-    private String composeReadAllRequest() {
+    private String composeReadAllRequest(String filePath) {
         // read_all "file"
         return Const.REQUEST_TYPE.READ_ALL_FILE + " " + "\"" + filePath + "\"";
     }
 
+    private String composeGetLastUpdate(String filePath){
+        //get_last_update "file"
+        return Const.REQUEST_TYPE.LAST_UPDATE + " " + "\"" + filePath + "\"";
+    }
     public  void sendACommand(int requestId, String requestStr) throws Exception {
         retransmit = true;
         final String composedRequestStr = Utils.composeRequest(requestId, requestStr);
         byte[] b = composedRequestStr.getBytes();
         DatagramPacket dp = new DatagramPacket(b , b.length , host , port);
 
-//        if(client.isReadOperation(composedRequestStr)){
-//            client.setFilePathOffsetAndLength(composedRequestStr);
-//            if(client.hasFileInCache()){
-//                if(client.dataIsFresh()){
-//                    client.showData();
-//                }else {
-//                    client.fetchLatestUpdate();
-//                    client.processLatestUpdate();
-//                }
-//                return;
-//            }
-//        }
+        if(isReadOperation(composedRequestStr)){
 
-        if(SIMULATE){ //simulate to control failure when send
+            // 1 read "file" 0 10
+            String [] firstSplit = requestStr.trim().split("\"");
+
+            String [] secondSplit = firstSplit[0].trim().replaceAll("( )+", " ").split(" ");//Split of: 1 read
+            String [] thirdSplit = firstSplit[2].trim().replaceAll("( )+", " ").split(" "); //split of:  0 10
+
+            String filePath = firstSplit[1];
+            int offset = Integer.valueOf(thirdSplit[0].trim());
+            int length = Integer.valueOf(thirdSplit[1].trim());
+            Utils.echo("file Path: " + filePath + " offset: " + offset  + " length: " + length);
+            if(hasFileInCache(filePath)){
+                Utils.echo("has file in cache: ");
+                CacheEntry entry = cache.get(filePath);
+                if(entry.dataIsFresh(cacheRefreshInterval)){
+                    Utils.echo("data is fresh: ");
+                    getDataFromCache(entry, offset, length);
+                }else {
+                    Utils.echo("data is not fresh, fetch latest modify time");
+                    fetchLatestUpdate(filePath, offset, length);
+                }
+            }else {
+                Utils.echo("not in cache, download file: ");
+                saveFileToCache(filePath, offset, length);
+            }
+            return;
+        }
+
+        if(SIMULATE_RETRANSMIT){ //simulate to control failure when send
             int random = randomGenerator.nextInt(1000);
-            Utils.echo("Random number: " + random);
-
+            Utils.echo("Random number: " + random + " request sent: " + (random % 2 == 0 ? " success " : " lost "));
             // Use a random number to control the result of request
             if(random % 2 == 0){
                 socket.send(dp); //send to correct port
@@ -197,6 +209,7 @@ public class UDPClient implements CallBack {
         }else {
             socket.send(dp);
         }
+
 
         service.schedule(new Runnable() {
             @Override
@@ -212,9 +225,54 @@ public class UDPClient implements CallBack {
                 }
             }
         }, retransmitInterval, TimeUnit.SECONDS);
+
+       setRetransmit(receiveReply());
+
     }
 
-    public   boolean receiveReply(int requestId) throws Exception{
+    private void saveFileToCache(String filePath, int offset, int length) throws Exception{
+        String request = composeReadAllRequest(filePath);
+        CacheCallBack cacheCallBack = new CacheCallBack() {
+            @Override
+            public void onDataReceive(String data) throws Exception{
+                CacheEntry cacheEntry = new CacheEntry(data.getBytes(), (System.currentTimeMillis()/1000),
+                        (System.currentTimeMillis()/1000));
+                //Default when download a new file, set last modify to current time
+                cache.put(filePath,  cacheEntry);
+                getDataFromCache(cacheEntry, offset, length);
+            }
+        };
+        processCommand(request, cacheCallBack);
+    }
+
+    private void processLatestUpdate(String filePath, int offset,int length) throws Exception{
+        Utils.echo("processLatestUpdate: " );
+
+        CacheEntry entry = cache.get(filePath);
+        if(entry.isValid()){
+            Utils.echo("latest update is valid, get data from cache " );
+            entry.setLastValidateTime(System.currentTimeMillis()/1000);
+            getDataFromCache(entry, offset, length);
+        }else {
+            String request = composeReadAllRequest(filePath);
+            Utils.echo("latest update is not valid, send: " + request );
+            CacheCallBack cacheCallBack = new CacheCallBack() {
+                @Override
+                public void onDataReceive(String data) throws Exception{
+                    Utils.echo("Get all file success: " + data );
+                    CacheEntry cacheEntry = cache.get(filePath);
+                    cacheEntry.setContent(data.getBytes());
+                    cacheEntry.setLastValidateTime(System.currentTimeMillis()/1000);
+                    cacheEntry.setLastModifiedTime(cacheEntry.getServerModifyTime());
+
+                    getDataFromCache(entry, offset, length);
+                }
+            };
+            processCommand(request, cacheCallBack);
+        }
+    }
+
+    public  boolean receiveReply() throws Exception{
         byte[] buffer = new byte[65536];
         DatagramPacket reply = new DatagramPacket(buffer, buffer.length);
         socket.receive(reply);
@@ -237,19 +295,31 @@ public class UDPClient implements CallBack {
 
         Utils.echo(reply.getAddress().getHostAddress() + " : " + reply.getPort() + " - " + requestIdInReply + " : " + replyContent);
 
-        if(requestIdInReply == requestId){ //only when receive a reply with request id match
+        if(requestCallBackMap.keySet().contains(requestIdInReply)){ //only when receive a reply with request id match
+
+            CacheCallBack cacheCallBack = requestCallBackMap.get(requestIdInReply);
+            if(cacheCallBack != null){
+                cacheCallBack.onDataReceive(replyContent);
+            }
+            requestCallBackMap.remove(requestIdInReply);
             return false;
-        }else {
-            Utils.echo("requestId " +  requestId + " does not match with requestID in reply " + requestIdInReply);
-            return true;
         }
+        return false;
 
     }
 
 
-    public void processCommand(String requestStr) throws Exception {
+    public void processCommand(String requestStr, CacheCallBack cacheCallBack) throws Exception {
         nextRequestId += 1;
+        requestCallBackMap.put(nextRequestId, cacheCallBack);
         sendACommand(nextRequestId, requestStr);
-        retransmit = receiveReply(nextRequestId);
+    }
+
+    public void setRetransmit(boolean retransmit) {
+        this.retransmit = retransmit;
+    }
+
+    public int getNextRequestId() {
+        return nextRequestId;
     }
 }
