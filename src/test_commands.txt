@@ -46,7 +46,8 @@ read_all "E:\IdeaProjects\codeforces\in.txt"
 
 
 7) start cmd 
-start localhost 7777 60 2
+start localhost 7777 5 2
+start localhost 7777 50 2
 start at_least_1
 start at_most_1
 

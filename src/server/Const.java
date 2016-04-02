@@ -10,6 +10,7 @@ public class Const {
         public static final String APPEND = "append";
         public static final String LAST_UPDATE = "get_last_update";
         public static final String READ_ALL_FILE = "read_all";
+        public static final String WRITE_ALL_FILE = "write_all";
     }
     public static class MESSAGE{
         public static final String REGISTER_SUCCESS = "You have registered successfully!";

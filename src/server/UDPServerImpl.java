@@ -111,6 +111,11 @@ public class UDPServerImpl {
                 readAllFileOperation.process();
                 break;
 
+            case Const.REQUEST_TYPE.WRITE_ALL_FILE:
+                WriteAllOperation writeAllOperation = new WriteAllOperation(sock, incoming, udpServer, requestId);
+                writeAllOperation.process();
+                break;
+
             default:
                 String errorMsg = Utils.addRequestId(requestId, "Error: command is not recognized");
                 DatagramPacket packet = new DatagramPacket(errorMsg.getBytes(), errorMsg.getBytes().length,
