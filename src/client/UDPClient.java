@@ -179,6 +179,7 @@ public class UDPClient implements CallBack {
             int offset = Integer.valueOf(thirdSplit[0].trim());
             int length = Integer.valueOf(thirdSplit[1].trim());
             Utils.echo("file Path: " + filePath + " offset: " + offset  + " length: " + length);
+
             if(hasFileInCache(filePath)){
                 Utils.echo("has file in cache: ");
                 CacheEntry entry = cache.get(filePath);
@@ -235,6 +236,10 @@ public class UDPClient implements CallBack {
         CacheCallBack cacheCallBack = new CacheCallBack() {
             @Override
             public void onDataReceive(String data) throws Exception{
+                if(data.contains(Const.MESSAGE.ERROR)){
+                    Utils.echo("Error occur, so do not save file content to cache!");
+                    return;
+                }
                 CacheEntry cacheEntry = new CacheEntry(data.getBytes(), (System.currentTimeMillis()/1000),
                         (System.currentTimeMillis()/1000));
                 //Default when download a new file, set last modify to current time
