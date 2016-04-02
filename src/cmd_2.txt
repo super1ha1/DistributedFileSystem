@@ -1,0 +1,53 @@
+1) READ
+init: a.txt not exist
+in.txt:  abcd
+
+read "E:\IdeaProjects\codeforces\a.txt" 0 1
+read "/Users/admin/Desktop/1516/work/DistributedFileSystem-master/in.txt" 0 1
+read "/Users/admin/Desktop/1516/work/DistributedFileSystem-master/in.txt" 5 1
+read "/Users/admin/Desktop/1516/work/DistributedFileSystem-master/in.txt" 0 4
+read "/Users/admin/Desktop/1516/work/DistributedFileSystem-master/in.txt" 0 10
+
+
+2) write
+init: in.txt: acd
+write "E:\IdeaProjects\codeforces\a.txt" 0 "z"
+write "/Users/admin/Desktop/1516/work/DistributedFileSystem-master/in.txt" 0 "z"
+write "/Users/admin/Desktop/1516/work/DistributedFileSystem-master/in.txt" 0 "xyz"
+write "/Users/admin/Desktop/1516/work/DistributedFileSystem-master/in.txt" 10 "z"
+write "/Users/admin/Desktop/1516/work/DistributedFileSystem-master/in.txt" 1 "b"
+
+3) register
+init: in.txt: acd
+
+register "/Users/admin/Desktop/1516/work/DistributedFileSystem-master/in.txt" 3
+register "/Users/admin/Desktop/1516/work/DistributedFileSystem-master/in.txt" 20
+register "/Users/admin/Desktop/1516/work/DistributedFileSystem-master/in.txt" 10000
+write "/Users/admin/Desktop/1516/work/DistributedFileSystem-master/in.txt" 0 "z"
+
+
+4) Append
+init: in.txt: acd
+register "/Users/admin/Desktop/1516/work/DistributedFileSystem-master/in.txt" 10000
+append "E:\IdeaProjects\codeforces\a.txt" "z"
+append "/Users/admin/Desktop/1516/work/DistributedFileSystem-master/in.txt" "z"
+append "/Users/admin/Desktop/1516/work/DistributedFileSystem-master/in.txt" "xyz"
+
+
+5) Get last update in Unix time (seconds)
+init: in.txt: acd
+get_last_update "E:\IdeaProjects\codeforces\a.txt"
+get_last_update "/Users/admin/Desktop/1516/work/DistributedFileSystem-master/in.txt"
+
+6) Read all file operation
+init: in.txt: acd
+read_all "E:\IdeaProjects\codeforces\a.txt"
+read_all "/Users/admin/Desktop/1516/work/DistributedFileSystem-master/in.txt"
+
+
+7) start cmd
+start localhost 7777 60 2
+start at_least_1
+start at_most_1
+
+

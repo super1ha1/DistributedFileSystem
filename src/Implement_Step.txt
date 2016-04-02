@@ -1,0 +1,31 @@
+29/03
+1) code read
+define request :
+id read "file_path" offset length
+
+"file_path": is absolute path, may contain space
+
+done read
+update interface
+
+2) code write
+define request:
+id write "file_path" offset "content"
+
+
+3) register callback
+define request
+id register "file_path" num_second
+
+
+4) append to the end a a file
+define request:
+id append "file_path" "content"
+
+
+5) get last_update_time of a file (return Unix time)
+define request:
+id get_last_update "file_path"
+
+Response:
+id "content"
