@@ -42,6 +42,7 @@ public class WriteOperation  extends Operation{
             FileInputStream in = null;
             FileOutputStream out = null;
             try {
+
                 in = new FileInputStream(filePath);
 
                 int avail = in.available();

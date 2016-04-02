@@ -5,11 +5,12 @@ import server.Const;
 import utils.CacheCallBack;
 import utils.Utils;
 
-import java.io.ByteArrayInputStream;
-import java.io.InputStream;
+import java.io.*;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.*;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -197,6 +198,101 @@ public class UDPClient implements CallBack {
             return;
         }
 
+        if(isWriteOperation(composedRequestStr)){
+
+            // 1 write "E:\IdeaProjects\codeforces\a.txt" 0 "z"
+            String [] firstSplit = composedRequestStr.trim().split("\"");
+            String [] secondSplit = firstSplit[0].trim().replaceAll("( )+", " ").split(" ");//Split of: 1 write
+
+            String filePath = firstSplit[1];
+            int offset = Integer.valueOf(firstSplit[2].trim());
+            String insert = firstSplit[3];
+
+            Utils.echo("file Path: " + filePath + " offset: " + offset  + " content: " + insert);
+
+
+            if(hasFileInCache(filePath)) {
+                Utils.echo("has file in cache: ");
+                CacheEntry entry = cache.get(filePath);
+
+                InputStream in = null;
+                try {
+
+                    in = new ByteArrayInputStream(entry.getContent());
+
+                    int avail = in.available();
+                    if(offset >= avail){
+                        Utils.echo(Utils.addRequestId(requestId, "Error: offset larger than length, offset: " + offset  + " len: " + avail));
+                        return;
+                    }
+
+                    byte[] currentByte = new byte[avail];
+                    in.read(currentByte);
+                    String currentContent = new String(currentByte);
+                    currentContent = currentContent.substring(0, offset) + insert + currentContent.substring(offset);
+
+                    entry.setContent(currentContent.getBytes());
+
+                    Utils.echo(Utils.addRequestId(requestId,  "Write to file successfully!"));
+
+                    String request = composeWriteAllRequest(filePath, currentContent);
+                    Utils.echo("request to write all files: " + request);
+                    processCommand(request, null);
+
+                } catch (Exception e){
+
+                    Utils.echo(Utils.addRequestId(requestId, "Error: Exception when writing"));
+                    e.printStackTrace();
+
+                }
+                finally {
+                    if (in != null) {
+                        in.close();
+                    }
+                }
+
+                return;
+            }
+        }
+
+        if(isAppendOperation(composedRequestStr)){
+
+            // 1 append "file_path" "content"
+            String [] firstSplit = composedRequestStr.trim().split("\"");
+            String [] secondSplit = firstSplit[0].trim().replaceAll("( )+", " ").split(" ");//Split of: 1 append
+
+            String filePath = firstSplit[1];
+            String insert = firstSplit[3];
+
+            Utils.echo("file Path: " + filePath  + " content: " + insert);
+
+            if(hasFileInCache(filePath)) {
+                Utils.echo("has file in cache: ");
+                CacheEntry entry = cache.get(filePath);
+                try {
+
+                    String currentContent = new String(entry.getContent());
+                    currentContent = currentContent + insert;
+
+                    entry.setContent(currentContent.getBytes());
+
+                    Utils.echo(Utils.addRequestId(requestId,  "Append to file successfully!"));
+
+                    String request = composeWriteAllRequest(filePath, currentContent);
+                    Utils.echo("request to write all files: " + request);
+                    processCommand(request, null);
+
+                } catch (Exception e){
+
+                    Utils.echo(Utils.addRequestId(requestId, "Error: Exception when writing"));
+                    e.printStackTrace();
+
+                }
+                return;
+            }
+        }
+
+
         if(SIMULATE_RETRANSMIT){ //simulate to control failure when send
             int random = randomGenerator.nextInt(1000);
             Utils.echo("Random number: " + random + " request sent: " + (random % 2 == 0 ? " success " : " lost "));
@@ -229,6 +325,32 @@ public class UDPClient implements CallBack {
 
        setRetransmit(receiveReply());
 
+    }
+
+    private boolean isWriteOperation(String composedRequestStr) {
+        // 1 write "file" 0 "content"
+        String [] firstSplit = composedRequestStr.trim().split("\"");
+        String [] secondSplit = firstSplit[0].trim().replaceAll("( )+", " ").split(" ");
+        String action = secondSplit[1].trim();
+
+        return action.equals(Const.REQUEST_TYPE.WRITE);
+    }
+
+
+    private boolean isAppendOperation(String composedRequestStr) {
+        // 1 append "E:\IdeaProjects\codeforces\in.txt" "z"
+        String [] firstSplit = composedRequestStr.trim().split("\"");
+        String [] secondSplit = firstSplit[0].trim().replaceAll("( )+", " ").split(" ");
+        String action = secondSplit[1].trim();
+
+        return action.equals(Const.REQUEST_TYPE.APPEND);
+    }
+
+    private String composeWriteAllRequest(String filePath, String newContent) {
+        // write_all "file" "new_content"
+        return Const.REQUEST_TYPE.WRITE_ALL_FILE
+                + " " + "\"" + filePath + "\""
+                + " " + "\"" + newContent + "\""  ;
     }
 
     private void saveFileToCache(String filePath, int offset, int length) throws Exception{
