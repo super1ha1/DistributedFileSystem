@@ -1,6 +1,7 @@
 1) READ
 init: a.txt not exist
 in.txt:  abcd
+abkjdks dlkj
 
 read "E:\IdeaProjects\codeforces\a.txt" 0 1
 read "/Users/admin/Desktop/1516/work/DistributedFileSystem-master/in.txt" 0 1
