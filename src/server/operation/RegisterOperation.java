@@ -1,14 +1,13 @@
-package utils;
+package server.operation;
 
 
-import server.Const;
 import server.UDPServer;
+import utils.Const;
+import server.RegisteredClient;
+import utils.Utils;
 
-import java.io.FileInputStream;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 
 public class RegisterOperation extends Operation {
 

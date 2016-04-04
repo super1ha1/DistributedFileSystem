@@ -1,9 +1,11 @@
 package server;
 
 
+import server.operation.*;
 import utils.*;
 
 import java.io.BufferedReader;
+import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
@@ -49,16 +51,20 @@ public class UDPServerImpl {
     }
 
     private static void startServer() throws Exception {
-        Utils.echo("Please start the server using command: start invocation_semantic");
-        Utils.echo("invocation_semantic can be either at_least_1 or at_most_1");
-        Utils.echo("Enter command: ");
-        String command = cin.readLine();
+        try {
+            Utils.echo("Please start the server using command: start invocation_semantic");
+            Utils.echo("invocation_semantic can be either at_least_1 or at_most_1");
+            Utils.echo("Enter command: ");
+            String command = cin.readLine();
 
-        String [] firstSplit = command.trim().replaceAll("( )+", " ").split(" "); //split start at_least_1
-        String semantic = firstSplit[1].trim();
-        udpServer.setInvocationSemantic(semantic);
+            String [] firstSplit = command.trim().replaceAll("( )+", " ").split(" "); //split start at_least_1
+            String semantic = firstSplit[1].trim();
+            udpServer.setInvocationSemantic(semantic);
 
-        Utils.echo("Server socket created with semantic " + semantic + ". Waiting for incoming data...");
+            Utils.echo("Server socket created with semantic " + semantic + ". Waiting for incoming data...");
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     private static void processCommand(DatagramSocket sock, DatagramPacket incoming) throws Exception{

@@ -1,11 +1,10 @@
-package utils;
+package server;
 
 
-import client.CallBack;
-import server.Const;
+import utils.Const;
+import utils.Utils;
 
 import java.io.FileInputStream;
-import java.io.InputStream;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;

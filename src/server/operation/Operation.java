@@ -1,7 +1,8 @@
-package utils;
+package server.operation;
 
 
 import server.UDPServer;
+import utils.Utils;
 
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
@@ -10,7 +11,7 @@ import java.util.Random;
 public abstract class Operation {
 
     private static final int WRONG_PORT = 3000;
-    private static final boolean SIMULATE_RETRANSMIT = false; //simulate to control the reply failure
+    private static final boolean SIMULATE_RETRANSMIT = true; //simulate to control the reply failure
 
     private UDPServer server;
     private int requestId;
@@ -37,6 +38,7 @@ public abstract class Operation {
         Utils.echo("Reply: " + new String(array));
 
         if(SIMULATE_RETRANSMIT){
+            randomGenerator.setSeed(1);
             int random = randomGenerator.nextInt(1000);
             Utils.echo("Random number: " + random + " reply sent: " + (random % 2 == 0 ? " success " : " lost "));
 
