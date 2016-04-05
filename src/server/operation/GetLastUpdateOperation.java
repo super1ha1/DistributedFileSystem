@@ -1,3 +1,12 @@
+/*
+* GetLastUpdateOperation class
+*
+* This class extends Operation class and its methods to server for get last update services
+*
+* */
+
+
+
 package server.operation;
 
 import server.UDPServer;

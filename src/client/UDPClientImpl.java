@@ -1,3 +1,12 @@
+/*
+* UDPClientImpl class
+*
+* Used as a main application class that contain a main method for client side.
+* The main purpose is to receive user's command to start the client and start the client based on that command
+*
+* */
+
+
 package client;
 
 

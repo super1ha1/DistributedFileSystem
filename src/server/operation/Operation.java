@@ -1,3 +1,13 @@
+/*
+* Operation abstract class
+*
+* Used as a placeholder for all operations. This class includes some basic functions that are usefull for all operations.
+* More specific methods will be extended by each operation class.
+*
+* */
+
+
+
 package server.operation;
 
 

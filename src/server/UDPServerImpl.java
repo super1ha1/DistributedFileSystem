@@ -1,3 +1,13 @@
+/*
+* UDPServerImpl class
+*
+* Used as a main application class that contain a main method for server side.
+* The main purpose is to receive user's command to start the server and start the server based on that command.
+* This main app also receive request message and invoke the methods in server accordingly.
+*
+* */
+
+
 package server;
 
 

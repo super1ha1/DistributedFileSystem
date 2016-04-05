@@ -1,3 +1,11 @@
+/*
+* Utils helper class
+*
+* This holds a list of general methods that frequently used in the application for both client and server side
+*
+* */
+
+
 package utils;
 
 

@@ -1,3 +1,12 @@
+/*
+* ReadAllFileOperation class
+*
+* This class extends Operation class and its methods to server for read all file services
+*
+* */
+
+
+
 package server.operation;
 
 

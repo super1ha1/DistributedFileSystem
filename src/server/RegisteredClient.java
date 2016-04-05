@@ -1,3 +1,13 @@
+/*
+* RegisteredClient class
+*
+* An entity that store information of registered clients to be used by server.
+* The information include the clients' address, port, the filepath that client requested to monitor,
+* the time period that the client registered, etc...
+*
+* */
+
+
 package server;
 
 

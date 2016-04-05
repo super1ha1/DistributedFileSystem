@@ -1,3 +1,12 @@
+/*
+* RegisterOperation class
+*
+* This class extends Operation class and its methods to server for register services, provided so that client can monitor file changes
+*
+* */
+
+
+
 package server.operation;
 
 

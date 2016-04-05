@@ -1,3 +1,12 @@
+/*
+* AppendOperation class
+*
+* This class extends Operation class and its methods to server for append services
+*
+* */
+
+
+
 package server.operation;
 
 

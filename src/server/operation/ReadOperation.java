@@ -1,3 +1,12 @@
+/*
+* ReadOperation class
+*
+* This class extends Operation class and its methods to server for read services
+*
+* */
+
+
+
 package server.operation;
 
 import server.UDPServer;

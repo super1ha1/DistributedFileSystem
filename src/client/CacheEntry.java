@@ -1,3 +1,13 @@
+/*
+* CacheEntry class
+*
+* The data structure used for storing each cache entries.
+* A single entry is set up with the file content, last validate time of that content and last modified time of the cache entry
+* After a specific time interval, cache entry will be updated based on the data from server to ensure information refreshness
+*
+* */
+
+
 package client;
 
 public class CacheEntry {

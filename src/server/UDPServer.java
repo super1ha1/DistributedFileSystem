@@ -1,3 +1,16 @@
+/*
+* UDPServer Class
+* Implementation of the server in a system with a set of data and according methods.
+*
+* The server object holds:
+* callback map used for updating registered clients about file changes,
+* invocationSemantic indicated by user when starting server,
+* datagram socket
+* and a map that store the request history to used in at_most_1 mode for checking duplicate request message
+*
+* */
+
+
 package server;
 
 
@@ -16,18 +29,17 @@ public class UDPServer {
     private DatagramSocket socket;
     private Map<String, Map<String, byte[]>> history = new HashMap<>();
 
-    public UDPServer(DatagramSocket socket){
+    public UDPServer(DatagramSocket socket) {
         this.socket = socket;
     }
 
+    public void onFileChanged() throws Exception {
 
-    public void onFileChanged() throws Exception{
-
-        for( String key: cbMap.keySet()){
+        for (String key : cbMap.keySet()) {
             RegisteredClient client = cbMap.get(key);
-            if(stillValid(client)){
+            if (stillValid(client)) {
                 client.onCallBack();
-            }else {
+            } else {
                 client.onRemove();
                 cbMap.remove(key);
             }
@@ -36,7 +48,7 @@ public class UDPServer {
 
     // valid = registerTime  + interval >= currentTime
     private boolean stillValid(RegisteredClient client) {
-        return client.getRegisteredTime() + client.getNumSeconds() >= (System.currentTimeMillis()/1000);
+        return client.getRegisteredTime() + client.getNumSeconds() >= (System.currentTimeMillis() / 1000);
     }
 
     public DatagramSocket getSocket() {
@@ -51,7 +63,7 @@ public class UDPServer {
         this.invocationSemantic = invocationSemantic;
     }
 
-    public  boolean isAtMostOne(){
+    public boolean isAtMostOne() {
         return this.invocationSemantic.equals(Const.SEMANTIC.AT_MOST_1);
     }
 
@@ -59,16 +71,16 @@ public class UDPServer {
     public boolean isOldRequest(InetAddress address, int port, int requestId) {
         String uniqueClient = Utils.encodeAddressAndPortToKey(address, port);
 
-        if(!history.keySet().contains(uniqueClient)){
-            return  false;
-        }
-
-        Map<String, byte[]> requestMap = history.get(uniqueClient);
-        if(!requestMap.keySet().contains(String.valueOf(requestId))){
+        if (!history.keySet().contains(uniqueClient)) {
             return false;
         }
 
-        return  true;
+        Map<String, byte[]> requestMap = history.get(uniqueClient);
+        if (!requestMap.keySet().contains(String.valueOf(requestId))) {
+            return false;
+        }
+
+        return true;
     }
 
     public void sendOldReply(InetAddress address, int port, int requestId) throws Exception {
@@ -86,10 +98,10 @@ public class UDPServer {
         String uniqueClient = Utils.encodeAddressAndPortToKey(address, port);
 
         Map<String, byte[]> requestMap;
-        if(this.history.keySet().contains(uniqueClient)){
+        if (this.history.keySet().contains(uniqueClient)) {
             requestMap = this.history.get(uniqueClient);
 
-        }else {
+        } else {
             requestMap = new HashMap<>();
             this.history.put(uniqueClient, requestMap);
         }

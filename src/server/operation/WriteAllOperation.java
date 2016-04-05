@@ -1,3 +1,12 @@
+/*
+* WriteAllOperation class
+*
+* This class extends Operation class and its methods to server for write all services
+*
+* */
+
+
+
 package server.operation;
 
 

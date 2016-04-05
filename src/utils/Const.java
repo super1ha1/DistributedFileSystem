@@ -1,3 +1,12 @@
+/*
+* Const helper class
+*
+* This holds a list of frequently used constant strings in the application for both client and server side
+*
+* */
+
+
+
 package utils;
 
 

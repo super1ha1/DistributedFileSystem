@@ -1,3 +1,15 @@
+/*
+* UDPClient class
+*
+* Implementing CallBack interface, used to hold all information for initializing a client program
+* Some important data are the address and port of the server that client connecting to,
+* the cacheRefreshInterval indicated when starting a client to set the time its cache will be updated,
+* the retransmitInterval indicated when starting a client to set the timeout for it to re-send request
+* after not receiving reply message.
+*
+* */
+
+
 package client;
 
 
@@ -17,7 +29,7 @@ public class UDPClient implements CallBack {
 
     private static final int SENTINEL = -1;
     public static final int FIRST_ID = 0;
-    private static final boolean SIMULATE_RETRANSMIT = true;
+    private static final boolean SIMULATE_RETRANSMIT = false;
     private static final int WRONG_PORT = 3000;
 
 
